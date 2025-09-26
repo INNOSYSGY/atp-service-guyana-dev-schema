@@ -38,10 +38,10 @@ jobs:
       #Run the schema export script
       - name: Export Schema
         env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USER: ${{ secrets.DB_USER }}
+          DB_URL: ${{ vars.DB_URL }}
+          DB_USER: ${{ vars.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          SCHEMA: ${{ secrets.SCHEMA }}
+          SCHEMA: ${{ vars.SCHEMA }}
           ATP_WALLET: ${{ secret.ATP_WALLET_DEVENV }}
           
         run: |
