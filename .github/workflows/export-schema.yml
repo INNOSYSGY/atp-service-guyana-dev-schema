@@ -1,0 +1,60 @@
+name: "Periodic Schema Export"
+
+on:
+  workflow_dispatch:  # Allow manual triggering
+  schedule:
+    # Run the workflow every day at midnight UTC
+    - cron: '30 17 * * 4'
+    
+permissions:
+  contents: write  # Grant write permissions to the GITHUB_TOKEN
+  
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Java (required for SQLcl)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      # Download and set up SQLcl
+      - name: Set up SQLcl
+        run: |
+          wget https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-24.4.1.042.1221.zip
+          unzip sqlcl-24.4.1.042.1221.zip
+          echo "$(pwd)/sqlcl/bin" >> $GITHUB_PATH
+          echo "Testing downloaded sqlcl"
+          $(pwd)/sqlcl/bin/sql -H
+          
+
+      #Run the schema export script
+      - name: Export Schema
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          SCHEMA: ${{ secrets.SCHEMA }}
+          ATP_WALLET: ${{ secret.ATP_WALLET_DEVENV }}
+          
+        run: |
+          chmod +x export_schema.sh
+          ./export_schema.sh
+
+      # Commit and push the exported schema file (optional)
+      - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOK }}
+        run: |
+          git config --global user.name "Leonardo Cuyar"
+          git config --global user.email "leo.cuyar@gmail.com"
+          git add .
+          git commit -m "Backup - $(date +%Y%m%d)"
+          git push
