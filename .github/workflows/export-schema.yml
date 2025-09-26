@@ -3,7 +3,7 @@ name: "Periodic Schema Export"
 on:
   workflow_dispatch:  # Allow manual triggering
   schedule:
-    # Run the workflow every day at midnight UTC
+    # Run the workflow every thursday
     - cron: '0 17 * * 4'
     
 permissions:
